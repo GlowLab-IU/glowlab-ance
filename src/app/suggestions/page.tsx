@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Separator } from "@radix-ui/react-separator";
 import { useSearchParams } from "next/navigation";
@@ -44,9 +44,8 @@ const products: Product[] = [
   },
 ];
 
-export default function SuggestionPage() {
+function SuggestionContent() {
   const searchParams = useSearchParams();
-
   const skinType = (searchParams?.get("acneType") ?? "oily") as
     | "oily"
     | "dry"
@@ -63,8 +62,7 @@ export default function SuggestionPage() {
   return (
     <div className="max-w-4xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center">
-        Recommended Products for{" "}
-        <span className="text-blue-500">{skinType}</span> Skin
+        Recommended Products for <span className="text-blue-500">{skinType}</span> Skin
       </h1>
       <Separator className="my-6" />
       {filteredProducts.length === 0 ? (
@@ -94,5 +92,13 @@ export default function SuggestionPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SuggestionPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
+      <SuggestionContent />
+    </Suspense>
   );
 }
