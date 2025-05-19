@@ -1,8 +1,9 @@
 "use client";
+
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Separator } from "@radix-ui/react-separator";
 import { useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
 
 interface Product {
   id: string;
@@ -12,7 +13,6 @@ interface Product {
   link: string;
 }
 
-// Mock Data
 const products: Product[] = [
   {
     id: "effaclar-gel",
@@ -46,14 +46,17 @@ const products: Product[] = [
 
 export default function SuggestionPage() {
   const searchParams = useSearchParams();
-  const skinType = searchParams?.get("acneType") ?? "oily";
+
+  const skinType = (searchParams?.get("acneType") ?? "oily") as
+    | "oily"
+    | "dry"
+    | "sensitive"
+    | "combination";
 
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    const result = products.filter((p) =>
-      p.forSkinType.includes(skinType as any)
-    );
+    const result = products.filter((p) => p.forSkinType.includes(skinType));
     setFilteredProducts(result);
   }, [skinType]);
 
@@ -64,7 +67,7 @@ export default function SuggestionPage() {
         <span className="text-blue-500">{skinType}</span> Skin
       </h1>
       <Separator className="my-6" />
-      {filteredProducts.length == 0 ? (
+      {filteredProducts.length === 0 ? (
         <p className="text-center text-muted-foreground">
           No products found for this skin type.
         </p>
@@ -81,7 +84,7 @@ export default function SuggestionPage() {
                   href={product.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 underline mt-2"
+                  className="text-blue-500 underline mt-2 block"
                 >
                   View Product
                 </a>
