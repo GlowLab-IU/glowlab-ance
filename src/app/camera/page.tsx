@@ -62,9 +62,8 @@ export default function CameraPage() {
       setLoading(false);
       setShouldUpload(false);
 
-      router.push(
-        "/result-medical?result=" + encodeURIComponent(JSON.stringify(result))
-      );
+      sessionStorage.setItem("ai_result", JSON.stringify(response.data));
+      router.push("/result-medical");
     } catch (error) {
       console.error("Error uploading image:", error);
       setLoading(false);

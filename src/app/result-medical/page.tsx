@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -35,8 +35,6 @@ const groupBoundingBoxes = (boundingBoxes: BoundingBox[]) => {
 };
 
 export default function ResultMedicalPage() {
-  const searchParams = useSearchParams();
-  const resultParam = searchParams?.get("result");
   const router = useRouter();
 
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
@@ -45,19 +43,21 @@ export default function ResultMedicalPage() {
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (resultParam) {
-      try {
-        const decoded = decodeURIComponent(resultParam);
-        const parsed = JSON.parse(decoded);
-        setBoundingBoxes(parsed.bounding_boxes || []);
-        setOutputImage(parsed.output_image || "");
-        setMessage(parsed.message || "");
-      } catch (err) {
-        console.error("Invalid result data", err);
+    try {
+      const stored = sessionStorage.getItem("ai_result");
+      if (!stored) {
         router.push("/camera");
+        return;
       }
+      const parsed = JSON.parse(stored);
+      setBoundingBoxes(parsed.bounding_boxes || []);
+      setOutputImage(parsed.output_image || "");
+      setMessage(parsed.message || "");
+    } catch (err) {
+      console.error("Invalid stored result data", err);
+      router.push("/camera");
     }
-  }, [resultParam]);
+  }, [router]);
 
   const toggleOpenState = (class_id: string) => {
     setOpenStates((prev) => ({ ...prev, [class_id]: !prev[class_id] }));
