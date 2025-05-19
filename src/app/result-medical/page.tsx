@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { inferSkinType } from "../suggestions/skintypeMock";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 interface BoundingBox {
   class_id: string;
@@ -36,28 +38,33 @@ const groupBoundingBoxes = (boundingBoxes: BoundingBox[]) => {
 
 export default function ResultMedicalPage() {
   const router = useRouter();
-
+  const { publicKey, connected } = useWallet();
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
   const [outputImage, setOutputImage] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
 
+  const [skinType, setSkinType] = useState<string>("oily");
+
   useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem("ai_result");
-      if (!stored) {
-        router.push("/camera");
-        return;
-      }
-      const parsed = JSON.parse(stored);
-      setBoundingBoxes(parsed.bounding_boxes || []);
-      setOutputImage(parsed.output_image || "");
-      setMessage(parsed.message || "");
-    } catch (err) {
-      console.error("Invalid stored result data", err);
+    const stored = sessionStorage.getItem("ai_result");
+    if (!stored) {
       router.push("/camera");
+      return;
     }
-  }, [router]);
+    const parsed = JSON.parse(stored);
+    setBoundingBoxes(parsed.bounding_boxes || []);
+    setOutputImage(parsed.output_image || "");
+    setMessage(parsed.message || "");
+
+    const grouped = groupBoundingBoxes(parsed.bounding_boxes || []);
+    const acneStats: Record<string, number> = {};
+    for (const [type, { count }] of Object.entries(grouped)) {
+      acneStats[type] = count;
+    }
+    const inferredSkin = inferSkinType(acneStats);
+    setSkinType(inferredSkin);
+  }, []);
 
   const toggleOpenState = (class_id: string) => {
     setOpenStates((prev) => ({ ...prev, [class_id]: !prev[class_id] }));
@@ -138,7 +145,15 @@ export default function ResultMedicalPage() {
         <Button variant="outline" onClick={() => router.push("/camera")}>
           Upload New
         </Button>
-        <Button onClick={() => router.push("/suggestions?acneType=" + maxType)}>
+        <Button
+          onClick={() => {
+            if (!connected) {
+              alert("Please connect your wallet to view suggestions.");
+              return;
+            }
+            router.push("/suggestions?skin=" + skinType);
+          }}
+        >
           Suggest Cosmetics
         </Button>
       </div>
