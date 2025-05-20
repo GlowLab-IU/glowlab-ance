@@ -1,7 +1,7 @@
-import { Toaster } from "sonner";
 import "./globals.css";
+import { Toaster } from "sonner";
 import { WalletProvider } from "@/components/WalletProvider";
-import Header from "@/components/Header";
+import ClientLayout from "@/components/ClientLayout";
 
 export const metadata = {
   title: "GlowChain",
@@ -15,11 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-background text-foreground">
+      <body>
         <WalletProvider>
-          <Toaster />
-          <Header />
-          <main className="pt-20 px-4">{children}</main>
+          <ClientLayout>
+            <Toaster />
+            {children}
+          </ClientLayout>
         </WalletProvider>
       </body>
     </html>

@@ -1,91 +1,97 @@
 "use client";
-import { Card, CardHeader } from "@/components/ui/card";
-import { Separator } from "@radix-ui/react-separator";
+
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { AnchorProvider, Program } from "@project-serum/anchor";
+import { Connection, PublicKey } from "@solana/web3.js";
+import idl from "@/idl/skincare_chain.json";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface Product {
-  id: string;
+const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44f8qUjNqz");
+const network = "https://api.devnet.solana.com";
+
+type ProductAccount = {
   name: string;
-  forSkinType: ("oily" | "dry" | "sensitive" | "combination")[];
-  description: string;
-  link: string;
-}
+  brand: string;
+  skin_type: string;
+  ingredients: string[];
+  authority: PublicKey;
+};
 
-// Mock Data
-const products: Product[] = [
-  {
-    id: "effaclar-gel",
-    name: "Effaclar Purifying Foaming Gel",
-    forSkinType: ["oily", "combination"],
-    description: "Cleanser for oily and acne-prone skin",
-    link: "https://www.laroche-posay.us/effaclar-gel",
-  },
-  {
-    id: "toleriane-dermo",
-    name: "Toleriane Dermo-Cleanser",
-    forSkinType: ["sensitive", "dry"],
-    description: "Gentle cleanser for sensitive skin",
-    link: "https://www.laroche-posay.us/toleriane-dermo-cleanser",
-  },
-  {
-    id: "lipikar-syndet",
-    name: "Lipikar Syndet AP+ Wash Cream",
-    forSkinType: ["dry", "sensitive"],
-    description: "Cream wash for dry and irritated skin",
-    link: "https://www.laroche-posay.us/lipikar-syndet",
-  },
-  {
-    id: "effaclar-medicated",
-    name: "Effaclar Medicated Gel Cleanser",
-    forSkinType: ["oily"],
-    description: "Acne treatment gel cleanser",
-    link: "https://www.laroche-posay.us/effaclar-medicated",
-  },
-];
-
-export default function SuggestionPage() {
+export default function SuggestionsPage() {
   const searchParams = useSearchParams();
-  const skinType = searchParams?.get("acneType") ?? "oily";
-
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const skinType = searchParams?.get("skin");
+  const anchorWallet = useAnchorWallet();
+  const [products, setProducts] = useState<ProductAccount[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const result = products.filter((p) =>
-      p.forSkinType.includes(skinType as any)
-    );
-    setFilteredProducts(result);
-  }, [skinType]);
+    if (!anchorWallet) return;
+
+    const fetchProducts = async () => {
+      try {
+        const connection = new Connection(network, "confirmed");
+        const provider = new AnchorProvider(connection, anchorWallet, {
+          commitment: "confirmed",
+        });
+        const program = new Program(idl as any, programId, provider);
+
+        const allAccounts = await program.account.product.all();
+
+        const filtered = skinType
+          ? allAccounts
+              .filter(
+                ({ account }) =>
+                  (account as ProductAccount).skin_type.toLowerCase() ===
+                  skinType.toLowerCase()
+              )
+              .map(({ account }) => account as ProductAccount)
+          : allAccounts.map(({ account }) => account as ProductAccount);
+
+        setProducts(filtered);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [anchorWallet, skinType]);
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center">
-        Recommended Products for{" "}
-        <span className="text-blue-500">{skinType}</span> Skin
+        Suggested Products
       </h1>
-      <Separator className="my-6" />
-      {filteredProducts.length == 0 ? (
+
+      {loading ? (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : products.length === 0 ? (
         <p className="text-center text-muted-foreground">
           No products found for this skin type.
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filteredProducts.map((product) => (
-            <Card key={product.id} className="p-4">
-              <CardHeader className="text-center">
-                <h2 className="text-xl font-semibold">{product.name}</h2>
+        <div className="grid gap-4">
+          {products.map((product, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <p className="font-semibold text-lg">{product.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {product.description}
+                  Brand: {product.brand} | Skin: {product.skin_type}
                 </p>
-                <a
-                  href={product.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline mt-2"
-                >
-                  View Product
-                </a>
               </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Ingredients: {product.ingredients.join(", ")}
+                </p>
+              </CardContent>
             </Card>
           ))}
         </div>

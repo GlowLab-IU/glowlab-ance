@@ -39,7 +39,7 @@ const groupBoundingBoxes = (boundingBoxes: BoundingBox[]) => {
   return grouped;
 };
 
-const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44zF8qUjNqz");
+const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44f8qUjNqz");
 const network = "https://api.devnet.solana.com";
 
 export default function ResultMedicalPage() {

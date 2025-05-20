@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
-import { AnchorProvider, Program } from "@project-serum/anchor";
+import { AnchorProvider, Program, Idl } from "@project-serum/anchor";
 import { Keypair, SystemProgram, Connection, PublicKey } from "@solana/web3.js";
-import idl from "@/idl/skincare_chain.json";
+import idlRaw from "@/idl/skincare_chain.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44zF8qUjNqz");
+const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44f8qUjNqz");
 const network = "https://api.devnet.solana.com";
 
 export default function RegisterProductPage() {
@@ -23,40 +23,54 @@ export default function RegisterProductPage() {
 
   const handleRegister = async () => {
     if (!anchorWallet) {
-      alert("Please connect wallet");
+      setStatus("❌ Wallet not connected");
       return;
     }
 
-    const connection = new Connection(network, "confirmed");
-    const provider = new AnchorProvider(connection, anchorWallet, {
-      commitment: "confirmed",
-    });
-    const program = new Program(idl as any, programId, provider);
-
-    const productKeypair = Keypair.generate();
+    if (!name || !brand || !skinType || !ingredients) {
+      setStatus("❗ Vui lòng điền đầy đủ thông tin sản phẩm.");
+      return;
+    }
 
     try {
-      await program.methods
-        .registerProduct(
-          name,
-          brand,
-          skinType,
-          ingredients.split(",").map((i) => i.trim())
-        )
+      setStatus("🔄 Đang chuẩn bị giao dịch...");
+
+      const connection = new Connection(network, "confirmed");
+      const provider = new AnchorProvider(connection, anchorWallet, {
+        commitment: "confirmed",
+      });
+
+      const idl = idlRaw as unknown as Idl;
+      const program = new Program(idl, programId, provider);
+      const ingredientList = ingredients.split(",").map((i) => i.trim());
+
+      const [productPDA] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("product"),
+          anchorWallet.publicKey.toBuffer(),
+          Buffer.from(name),
+        ],
+        programId
+      );
+
+      setStatus("📝 Đang ký và gửi giao dịch...");
+
+      const tx = await program.methods
+        .registerProduct(name, brand, skinType, ingredientList)
         .accounts({
-          product: productKeypair.publicKey,
-          user: provider.wallet.publicKey,
+          product: productPDA,
+          user: anchorWallet.publicKey,
           systemProgram: SystemProgram.programId,
         })
-        .signers([productKeypair])
         .rpc();
 
+      console.log("✅ Giao dịch thành công:", tx);
+      setStatus("✅ Đã đăng sản phẩm! Giao dịch: " + tx);
+    } catch (err: any) {
+      console.error("❌ Giao dịch thất bại:", err);
       setStatus(
-        "✅ Product registered on-chain: " + productKeypair.publicKey.toBase58()
+        "❌ Đăng sản phẩm thất bại: " + (err.message || "Unknown error")
       );
-    } catch (err) {
-      console.error(err);
-      setStatus("❌ Registration failed");
     }
   };
 
@@ -86,7 +100,11 @@ export default function RegisterProductPage() {
       <Button onClick={handleRegister} disabled={!connected}>
         Đăng sản phẩm
       </Button>
-      {status && <p className="text-muted-foreground text-sm mt-2">{status}</p>}
+      {status && (
+        <div className="mt-3 p-3 bg-gray-100 rounded text-sm text-gray-800">
+          {status}
+        </div>
+      )}
     </div>
   );
 }

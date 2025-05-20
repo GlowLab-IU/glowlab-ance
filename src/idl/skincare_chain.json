@@ -1,5 +1,5 @@
 {
-  "address": "Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44zF8qUjNqz",
+  "address": "Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44f8qUjNqz",
   "metadata": {
     "name": "skincare_chain",
     "version": "0.1.0",
@@ -8,22 +8,45 @@
   },
   "instructions": [
     {
-      "name": "register_product",
+      "name": "registerProduct",
       "discriminator": [
-        224,
-        97,
-        195,
-        220,
-        124,
-        218,
-        78,
-        43
+        216,
+        65,
+        92,
+        38,
+        146,
+        175,
+        98,
+        235
       ],
       "accounts": [
         {
           "name": "product",
           "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  100,
+                  117,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              }
+            ]
+          }
         },
         {
           "name": "user",

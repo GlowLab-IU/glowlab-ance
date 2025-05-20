@@ -1,9 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Menu, X } from "lucide-react";
+
+// 👇 Import WalletMultiButton as client-only
+const WalletMultiButtonDynamic = dynamic(
+  async () =>
+    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
+  { ssr: false }
+);
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -28,11 +35,11 @@ const Header = () => {
           <Link href="/camera">Scan</Link>
           <Link href="/result-medical">Result</Link>
           <Link href="/register-product">Register Product</Link>
-          <WalletMultiButton />
+          <WalletMultiButtonDynamic />
         </div>
 
         <div className="md:hidden flex items-center gap-2">
-          <WalletMultiButton />
+          <WalletMultiButtonDynamic />
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             {isMobileMenuOpen ? (
               <X className="w-6 h-6" />
