@@ -1,0 +1,107 @@
+{
+  "address": "Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44zF8qUjNqz",
+  "metadata": {
+    "name": "skincare_chain",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "register_product",
+      "discriminator": [
+        224,
+        97,
+        195,
+        220,
+        124,
+        218,
+        78,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "product",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "brand",
+          "type": "string"
+        },
+        {
+          "name": "skin_type",
+          "type": "string"
+        },
+        {
+          "name": "ingredients",
+          "type": {
+            "vec": "string"
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Product",
+      "discriminator": [
+        102,
+        76,
+        55,
+        251,
+        38,
+        73,
+        224,
+        229
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "Product",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "brand",
+            "type": "string"
+          },
+          {
+            "name": "skin_type",
+            "type": "string"
+          },
+          {
+            "name": "ingredients",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          }
+        ]
+      }
+    }
+  ]
+}

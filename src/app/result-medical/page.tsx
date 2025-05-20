@@ -6,7 +6,10 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { inferSkinType } from "../suggestions/skintypeMock";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
+import { Connection, Transaction, PublicKey } from "@solana/web3.js";
+import { AnchorProvider, Program } from "@project-serum/anchor";
+import idl from "@/idl/skincare_chain.json";
 
 interface BoundingBox {
   class_id: string;
@@ -36,9 +39,13 @@ const groupBoundingBoxes = (boundingBoxes: BoundingBox[]) => {
   return grouped;
 };
 
+const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44zF8qUjNqz");
+const network = "https://api.devnet.solana.com";
+
 export default function ResultMedicalPage() {
   const router = useRouter();
-  const { publicKey, connected } = useWallet();
+  const { connected } = useWallet();
+  const anchorWallet = useAnchorWallet();
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
   const [outputImage, setOutputImage] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -76,6 +83,30 @@ export default function ResultMedicalPage() {
   )[0];
   const maxType = dominantType?.[0] ?? "";
   const maxCount = dominantType?.[1].count ?? 0;
+
+  const handleSuggest = async () => {
+    if (!anchorWallet) {
+      alert("Please connect your wallet to view suggestions.");
+      return;
+    }
+
+    try {
+      const connection = new Connection(network, "confirmed");
+      const provider = new AnchorProvider(connection, anchorWallet, {
+        commitment: "confirmed",
+      });
+      const program = new Program(idl as any, programId, provider);
+
+      const tx = new Transaction();
+      tx.add(); // Optional: Add custom instruction here
+      const sig = await provider.sendAndConfirm(tx, []);
+      console.log("Recorded suggestion view tx:", sig);
+
+      router.push("/suggestions?skin=" + skinType);
+    } catch (err) {
+      console.error("Transaction error:", err);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-4">
@@ -145,17 +176,7 @@ export default function ResultMedicalPage() {
         <Button variant="outline" onClick={() => router.push("/camera")}>
           Upload New
         </Button>
-        <Button
-          onClick={() => {
-            if (!connected) {
-              alert("Please connect your wallet to view suggestions.");
-              return;
-            }
-            router.push("/suggestions?skin=" + skinType);
-          }}
-        >
-          Suggest Cosmetics
-        </Button>
+        <Button onClick={handleSuggest}>Suggest Cosmetics</Button>
       </div>
     </div>
   );
