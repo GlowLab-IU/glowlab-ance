@@ -27,6 +27,7 @@ const Header = () => {
           <Link href="/">Home</Link>
           <Link href="/camera">Scan</Link>
           <Link href="/result-medical">Result</Link>
+          <Link href="/register-product">Register Product</Link>
           <WalletMultiButton />
         </div>
 
@@ -56,6 +57,12 @@ const Header = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Result
+            </Link>
+            <Link
+              href="/register-product"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Register Product
             </Link>
           </nav>
         </div>
