@@ -33,8 +33,8 @@ export default function Home() {
           <div className="absolute top-20 right-[10%] w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
           <div className="absolute bottom-20 left-[10%] w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
 
-          <div className="container relative pt-20 pb-24 md:pt-28 md:pb-32">
-            <div className="max-w-3xl mx-auto text-center">
+          <div className="inline container relative pt-20 pb-24 md:pt-28 md:pb-32">
+            <div className="pt-6 max-w-3xl mx-auto text-center">
               <Badge className="mb-4 bg-violet-100 text-violet-800 hover:bg-violet-100 border-violet-200">
                 Web3 Powered Skincare
               </Badge>
@@ -86,7 +86,7 @@ export default function Home() {
 
         {/* Stats Section */}
         <section className="py-12 bg-white border-y">
-          <div className="container">
+          <div className="inline container">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
                 <p className="text-3xl md:text-4xl font-bold text-violet-600 mb-2">
@@ -118,7 +118,7 @@ export default function Home() {
 
         {/* Main User/Brand Sections */}
         <section className="py-20 bg-white">
-          <div className="container">
+          <div className="inline container">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Choose Your Path
@@ -277,7 +277,7 @@ export default function Home() {
 
         {/* Technology Section */}
         <section className="py-20 bg-white">
-          <div className="container">
+          <div className="inline container">
             <div className="text-center mb-16">
               <Badge className="mb-4 bg-violet-100 text-violet-800 hover:bg-violet-100 border-violet-200">
                 Our Technology
@@ -394,7 +394,7 @@ export default function Home() {
 
         {/* Testimonials Section */}
         <section className="py-20 bg-gradient-to-br from-violet-50 to-indigo-50">
-          <div className="container">
+          <div className="inline container">
             <div className="text-center mb-16">
               <Badge className="mb-4 bg-violet-100 text-violet-800 hover:bg-violet-100 border-violet-200">
                 Success Stories
@@ -543,7 +543,7 @@ export default function Home() {
 
         {/* CTA Section */}
         <section className="py-20 bg-violet-900 text-white">
-          <div className="container">
+          <div className="inline container">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 Ready to Transform Your Skin Journey?
@@ -575,7 +575,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-300 py-12">
-        <div className="container">
+        <div className="inline container">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
