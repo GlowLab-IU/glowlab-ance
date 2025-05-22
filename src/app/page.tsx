@@ -74,16 +74,14 @@ export default function Home() {
               </div>
 
               <div className="mt-12 flex justify-center">
-                <div className="relative w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-2xl">
-                  {/* Video element */}
-                  <video
-                    src="/video.mp4"
-                    className="object-cover w-full h-full"
-                    controls // hiện thanh điều khiển play/pause/volume
-                    muted={true} // nếu muốn autoPlay thì muted phải = true
-                    loop={true} // nếu muốn lặp lại thì chuyển sang true
-                  />
-                </div>
+                <video
+                  src="https://res.cloudinary.com/eggoeggoeggoeggo/video/upload/v1747933948/samples/video/Ba%CC%89n_sao_invideo-ai-1080_Revolutionizing_Skincare_with_AI_Block_2025-05-22_o10ekg.mp4"
+                  className="object-cover w-full h-full"
+                  controls
+                  muted
+                  loop
+                  autoPlay
+                />
               </div>
             </div>
           </div>

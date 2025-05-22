@@ -135,14 +135,17 @@ export default function Dashboard() {
               PRODUCT CERTIFICATION MANAGEMENT
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 ">
             <Button
               variant="outline"
               size="sm"
-              className="border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+              className="border-slate-700 bg-[darkgreen] text-slate-300 hover:bg-[darkgreen] hover:text-white"
             >
-              <Link href="/certification-process" className="flex items-center">
-                <ShieldCheck className="mr-2 h-4 w-4" />
+              <Link
+                href="/certification-process"
+                className="flex items-center "
+              >
+                <ShieldCheck className="mr-2 h-4 w-4 " />
                 Certification Process
               </Link>
             </Button>
