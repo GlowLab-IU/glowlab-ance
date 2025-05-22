@@ -1,6 +1,7 @@
 "use client";
 import type React from "react";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -313,9 +314,11 @@ export default function OurProcess() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-6 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300">
-                      Start Your Skin Journey
-                    </Button>
+                    <Link href="/camera" passHref>
+                      <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-6 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300">
+                        Start Your Skin Journey
+                      </Button>
+                    </Link>
                   </motion.div>
                 </div>
               </div>

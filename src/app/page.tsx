@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CustomBadge as Badge } from "@/components/ui/badge";
+
 import OurProcess from "@/components/OurProcess";
 import {
   Upload,
@@ -17,6 +17,11 @@ import {
   Database,
   UserCircle,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+export function SomeComponent() {
+  return <Badge color="red">Hello</Badge>;
+}
 
 export default function Home() {
   return (

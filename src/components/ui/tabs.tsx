@@ -1,107 +1,55 @@
 "use client";
 
-import React, { ReactElement, ReactNode, useState } from "react";
-import { ThemeProvider } from "@/components/theme-provider";
-interface TabsInjectedProps {
-  activeValue?: string;
-  setActiveValue?: React.Dispatch<React.SetStateAction<string>>;
-}
+import * as React from "react";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
 
-type TabsProps = {
-  children: ReactElement<TabsInjectedProps> | ReactElement<TabsInjectedProps>[];
-  defaultValue?: string;
-  className?: string;
-};
+import { cn } from "@/lib/utils";
 
-type TabsListProps = {
-  children: ReactNode;
-  className?: string;
-};
+const Tabs = TabsPrimitive.Root;
 
-type TabsTriggerProps = {
-  value: string;
-  children: ReactNode;
-  activeValue?: string;
-  setActiveValue?: React.Dispatch<React.SetStateAction<string>>;
-  className?: string;
-};
+const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn(
+      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+      className
+    )}
+    {...props}
+  />
+));
+TabsList.displayName = TabsPrimitive.List.displayName;
 
-type TabsContentProps = {
-  value: string;
-  activeValue?: string;
-  setActiveValue?: React.Dispatch<React.SetStateAction<string>>;
-  children: ReactNode;
-  className?: string;
-};
+const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+      className
+    )}
+    {...props}
+  />
+));
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
-export function Tabs({ children, defaultValue, className }: TabsProps) {
-  const [activeValue, setActiveValue] = useState(defaultValue || "");
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      className
+    )}
+    {...props}
+  />
+));
+TabsContent.displayName = TabsPrimitive.Content.displayName;
 
-  return (
-    <div className={className}>
-      {React.Children.map(children, (child) => {
-        if (!React.isValidElement<TabsInjectedProps>(child)) return null;
-
-        return React.cloneElement<TabsInjectedProps>(child, {
-          activeValue,
-          setActiveValue,
-        });
-      })}
-    </div>
-  );
-}
-
-export function TabsList({ children, className }: TabsListProps) {
-  return (
-    <div
-      role="tablist"
-      className={className}
-      style={{ display: "flex", gap: 10 }}
-    >
-      {children}
-    </div>
-  );
-}
-
-export function TabsTrigger({
-  value,
-  children,
-  activeValue,
-  setActiveValue,
-  className,
-}: TabsTriggerProps) {
-  const isActive = activeValue === value;
-
-  return (
-    <button
-      role="tab"
-      aria-selected={isActive}
-      onClick={() => setActiveValue && setActiveValue(value)}
-      className={className}
-      style={{
-        padding: "8px 16px",
-        cursor: "pointer",
-        borderBottom: isActive ? "2px solid blue" : "2px solid transparent",
-        background: "none",
-        border: "none",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-export function TabsContent({
-  value,
-  activeValue,
-  children,
-  className,
-}: TabsContentProps) {
-  if (!activeValue || value !== activeValue) return null;
-
-  return (
-    <div role="tabpanel" className={className}>
-      {children}
-    </div>
-  );
-}
+export { Tabs, TabsList, TabsTrigger, TabsContent };
