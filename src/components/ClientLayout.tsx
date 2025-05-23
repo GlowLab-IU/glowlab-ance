@@ -10,7 +10,7 @@ export default function ClientLayout({
   return (
     <>
       <Header />
-      {children}
+      <div className="pt-12">{children}</div>
     </>
   );
 }
