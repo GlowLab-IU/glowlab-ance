@@ -83,8 +83,7 @@ export default function Home() {
                   loop
                   autoPlay
                 />
-=======
->>>>>>> a3ce03e
+
                 <div className="relative w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-2xl">
                   {/* Video element */}
                   <video
@@ -874,6 +873,10 @@ export default function Home() {
           </div>
         </div>
       </footer>
+        </div>
+      </footer>
+  );
     </div>
   );
 }
+    
