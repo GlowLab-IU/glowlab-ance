@@ -16,6 +16,8 @@ interface AcneResultsProps {
     rawData?: any
     overallSeverity?: "low" | "medium" | "high"
     totalScore?: number
+    skinType?: string
+    composition?: string[]
   }
 }
 
@@ -259,7 +261,7 @@ export function AcneResults({ results }: AcneResultsProps) {
         </div>
       )}
 
-      
+
 
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="pt-6">

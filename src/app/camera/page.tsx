@@ -12,7 +12,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AcneUploader } from "@/components/acne-uploader"
 import { AcneResults } from "@/components/acne-results"
-import { inferSkinType } from "../suggestions/skintypeMock";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function ScanAcnePage() {
@@ -23,25 +22,18 @@ export default function ScanAcnePage() {
     types: Array<{ name: string; count: number; severity: "low" | "medium" | "high" }>
     alerts: string[]
     rawData?: any
+    overallSeverity?: "low" | "medium" | "high"
+    totalScore?: number
+    compositionInfo?: Record<string, string>
+    skinType?: string
+    composition?: string[]
   }>(null)
 
   const [skinType, setSkinType] = useState<string>("oily");
+  const [composition, setComposition] = useState<string[]>([]);
   const { connected } = useWallet();
   const router = useRouter();
 
-  // Xử lý khi có kết quả AI thì xác định skinType
-  useEffect(() => {
-    if (acneResults) {
-      const acneStats: Record<string, number> = {};
-      acneResults.types.forEach((item) => {
-        acneStats[item.name] = item.count;
-      });
-      const inferred = inferSkinType(acneStats);
-      setSkinType(inferred);
-    }
-  }, [acneResults]);
-
-  // Đảm bảo upload chỉ chạy sau khi set ảnh xong
   const handleFileSelected = async (file: File) => {
     const objectURL = URL.createObjectURL(file)
     setImageUri(objectURL)
@@ -76,17 +68,39 @@ export default function ScanAcnePage() {
     try {
       const formData = new FormData()
       formData.append("image", fileOrBlob)
-      const response = await axios.post("https://acne10.aiotlab.io.vn/upload_image", formData, {
+      const response = await axios.post("https://inspired-bear-emerging.ngrok-free.app/upload_image", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       clearInterval(uploadInterval)
       setProgress(100)
       setScanStage("scanning")
       setTimeout(() => {
-        const processedResults = processAIResults(response.data)
-        setAcneResults(processedResults)
-        setScanStage("results")
-        setProgress(0)
+        // Add console log to debug the API response
+        console.log("API Response:", response.data);
+        
+        // Extract fields using correct API response field names
+        const skinTypeFromApi = response.data.skin_type || "";
+        const compositionsFromApi = response.data.recommended_compositions || response.data.composition || [];
+        
+        // Set state variables with the extracted data
+        setSkinType(skinTypeFromApi.toLowerCase());
+        setComposition(Array.isArray(compositionsFromApi) ? compositionsFromApi : []);
+        
+        // Add the skinType and composition directly to the results object
+        const processedResults = {
+          ...processAIResults(response.data),
+          skinType: skinTypeFromApi,
+          composition: compositionsFromApi
+        };
+        
+        // Log the processed results to verify data
+        console.log("Processed Results:", processedResults);
+        console.log("Extracted Skin Type:", skinTypeFromApi);
+        console.log("Extracted Compositions:", compositionsFromApi);
+        
+        setAcneResults(processedResults);
+        setScanStage("results");
+        setProgress(0);
       }, 800)
     } catch (error) {
       clearInterval(uploadInterval)
@@ -96,81 +110,93 @@ export default function ScanAcnePage() {
     }
   }
 
-  // Map key API về đúng key UI nếu cần
+  // Keep the existing processAIResults function but ensure it doesn't override our composition
   const processAIResults = (aiData: any) => {
-  const types: Array<{ name: string; count: number; severity: "low" | "medium" | "high" }> = []
-  const alerts: string[] = []
+    const types: Array<{ name: string; count: number; severity: "low" | "medium" | "high" }> = []
+    const alerts: string[] = []
 
-  // Bảng điểm severity
-  const severityPoints: Record<string, number> = {
-    blackhead: 1,
-    whitehead: 1,
-    milium: 1,
-    flat_wart: 1,
-    syringoma: 1,
-    papular: 2,
-    purulent: 2,
-    folliculitis: 2,
-    "sebo-crystan-conglo": 2,
-    cystic: 3,
-    acne_scars: 3,
-    keloid: 3,
-  }
+    const severityPoints: Record<string, number> = {
+      blackhead: 1,
+      whitehead: 1,
+      milium: 1,
+      flat_wart: 1,
+      syringoma: 1,
+      papular: 2,
+      purulent: 2,
+      folliculitis: 2,
+      "sebo-crystan-conglo": 2,
+      cystic: 3,
+      acne_scars: 3,
+      keloid: 3,
+    }
 
-  // Danh sách các loại mụn hỗ trợ
-  const acneTypes = Object.keys(severityPoints)
+    // Danh sách các loại mụn hỗ trợ
+    const acneTypes = Object.keys(severityPoints)
 
-  // Đếm số lượng từng loại mụn
-  const countMap: Record<string, number> = {}
-  if (Array.isArray(aiData.bounding_boxes)) {
-    aiData.bounding_boxes.forEach((box: any) => {
-      const key = box.class_id
-      if (acneTypes.includes(key)) {
-        countMap[key] = (countMap[key] || 0) + 1
+    // Đếm số lượng từng loại mụn
+    const countMap: Record<string, number> = {}
+    if (Array.isArray(aiData.bounding_boxes)) {
+      aiData.bounding_boxes.forEach((box: any) => {
+        const key = box.class_id
+        if (acneTypes.includes(key)) {
+          countMap[key] = (countMap[key] || 0) + 1
+        }
+      })
+    }
+
+    // Map sang format types (chỉ lấy count >= 1)
+    acneTypes.forEach((name) => {
+      const count = countMap[name] || 0
+      if (count > 0) {
+        // Gán severity từng loại dựa trên điểm
+        let severity: "low" | "medium" | "high" = "low"
+        if (severityPoints[name] === 3) severity = "high"
+        else if (severityPoints[name] === 2) severity = "medium"
+        types.push({ name, count, severity })
       }
     })
-  }
 
-  // Map sang format types (chỉ lấy count >= 1)
-  acneTypes.forEach((name) => {
-    const count = countMap[name] || 0
-    if (count > 0) {
-      // Gán severity từng loại dựa trên điểm
-      let severity: "low" | "medium" | "high" = "low"
-      if (severityPoints[name] === 3) severity = "high"
-      else if (severityPoints[name] === 2) severity = "medium"
-      types.push({ name, count, severity })
+    // Tính tổng điểm để xác định mức độ nghiêm trọng tổng thể
+    const totalScore = Object.entries(countMap).reduce(
+      (sum, [acne, count]) => sum + (severityPoints[acne] || 0) * count,
+      0
+    )
+    let overallSeverity: "low" | "medium" | "high" = "low"
+    if (totalScore > 20) overallSeverity = "high"
+    else if (totalScore > 10) overallSeverity = "medium"
+
+    // Alert nếu có mụn nang
+    if (countMap["cystic"] && countMap["cystic"] > 0) {
+      alerts.push("Phát hiện mụn nang nghiêm trọng. Nên tham khảo ý kiến bác sĩ da liễu.")
     }
-  })
 
-  // Tính tổng điểm để xác định mức độ nghiêm trọng tổng thể
-  const totalScore = Object.entries(countMap).reduce(
-    (sum, [acne, count]) => sum + (severityPoints[acne] || 0) * count,
-    0
-  )
-  let overallSeverity: "low" | "medium" | "high" = "low"
-  if (totalScore > 20) overallSeverity = "high"
-  else if (totalScore > 10) overallSeverity = "medium"
+    // Also extract composition descriptions if available in the API response
+    const compositionInfo: Record<string, string> = {};
+    if (aiData.composition_details && typeof aiData.composition_details === 'object') {
+      Object.entries(aiData.composition_details).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          compositionInfo[key] = value;
+        }
+      });
+    }
 
-  // Alert nếu có mụn nang
-  if (countMap["cystic"] && countMap["cystic"] > 0) {
-    alerts.push("Phát hiện mụn nang nghiêm trọng. Nên tham khảo ý kiến bác sĩ da liễu.")
+    return {
+      types,
+      alerts,
+      rawData: aiData,
+      overallSeverity,
+      totalScore,
+      compositionInfo
+      // Remove skinType and composition from here since we're adding them directly above
+    }
   }
-
-  return {
-    types,
-    alerts,
-    rawData: aiData,
-    overallSeverity, // truyền thêm mức độ tổng thể
-    totalScore,
-  }
-}
 
   const resetScan = () => {
     setScanStage("instructions")
     setProgress(0)
     setAcneResults(null)
     setImageUri(null)
+    setComposition([])
   }
 
   return (
@@ -276,22 +302,76 @@ export default function ScanAcnePage() {
 
           {scanStage === "results" && acneResults && (
             <div className="space-y-8">
+              {/* Log acneResults to verify data */}
+              
               <Tabs defaultValue="results" className="w-full">
                 <div className="relative flex justify-center my-6">
-                  {/* Khung màu xám sau cùng */}
                   <div className="bg-gray-300 w-[320px] h-14 rounded-md absolute top-0 left-1/2 -translate-x-1/2 z-0" />
 
-                  {/* Khung màu trắng ở giữa */}
                   <div className="bg-white w-[280px] h-12 rounded-md absolute top-1 left-1/2 -translate-x-1/2 z-10" />
 
-                  {/* Dòng chữ đè lên khung trắng */}
                   <div className="relative z-20 text-xl font-semibold text-gray-800 flex items-center justify-center h-12">
                     Acne Detection Results
                   </div>
                 </div>
 
                 <TabsContent value="results" className="mt-6">
-                  <AcneResults results={acneResults} />
+                  <AcneResults results={{
+                    ...acneResults,
+                    skinType: skinType,
+                    composition: composition
+                  }} />
+                  
+                  {/* Enhanced display for skin type and recommended ingredients */}
+                  <div className="mt-6 p-6 bg-slate-50 rounded-lg shadow-sm">
+                    <h3 className="text-xl font-semibold mb-4 text-center border-b pb-2">Analysis Results</h3>
+                    
+                    <div className="mb-6">
+                      <h4 className="text-lg font-medium mb-2 flex items-center">
+                        <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                        Detected Skin Type
+                      </h4>
+                      <div className="ml-5 bg-white p-3 rounded-md shadow-sm">
+                        <span className="text-blue-600 font-medium">{skinType}</span>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {skinType === 'oily' && "Tends to have excess sebum production and may be prone to acne and enlarged pores."}
+                          {skinType === 'dry' && "Tends to feel tight, may have flaky patches, and needs extra hydration."}
+                          {skinType === 'combination' && "Features both oily and dry areas, typically oily in the T-zone and dry elsewhere."}
+                          {skinType === 'sensitive' && "May react easily to products with redness, irritation, or discomfort."}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {composition.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-medium mb-2 flex items-center">
+                          <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                          Recommended Active Ingredients
+                        </h4>
+                        <div className="ml-5 bg-white p-4 rounded-md shadow-sm">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {composition.map((item, index) => (
+                              <div key={index} className="border border-green-100 rounded-lg p-3 hover:bg-green-50 transition">
+                                <div className="flex items-start">
+                                  <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    {item}
+                                  </div>
+                                </div>
+                                {acneResults?.compositionInfo?.[item] && (
+                                  <p className="text-sm text-gray-600 mt-2">
+                                    {acneResults.compositionInfo[item]}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-4">
+                            These ingredients are recommended based on your skin analysis. Look for products containing these ingredients.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </TabsContent>
               </Tabs>
 
@@ -305,7 +385,9 @@ export default function ScanAcnePage() {
                       alert("Please connect your wallet to view suggestions.");
                       return;
                     }
-                    router.push("/suggestions?skin=" + skinType);
+                    
+                    const compositionJSON = JSON.stringify(composition);
+                    router.push(`/suggestions?skinType=${skinType}&composition=${encodeURIComponent(compositionJSON)}`);
                   }}
                 >
                   Suggest Cosmetics
