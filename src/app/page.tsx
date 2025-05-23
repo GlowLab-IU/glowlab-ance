@@ -591,9 +591,6 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-300 py-12">
         <div className="w-full max-w-[1280px] mx-auto px-4">
-
-        <div className="inline container">
-        <div className="w-full max-w-[1280px] mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -823,7 +820,6 @@ export default function Home() {
               </ul>
             </div>
           </div>
-
           <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-slate-500 mb-4 md:mb-0">
               © {new Date().getFullYear()} GlowChain. All rights reserved.
@@ -873,10 +869,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-        </div>
-      </footer>
-  );
-    </div>
+    </div>   
   );
 }
     
