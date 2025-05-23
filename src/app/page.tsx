@@ -74,6 +74,7 @@ export default function Home() {
               </div>
 
               <div className="mt-12 flex justify-center">
+<<<<<<< HEAD
                 <video
                   src="https://res.cloudinary.com/eggoeggoeggoeggo/video/upload/v1747933948/samples/video/Ba%CC%89n_sao_invideo-ai-1080_Revolutionizing_Skincare_with_AI_Block_2025-05-22_o10ekg.mp4"
                   className="object-cover w-full h-full"
@@ -82,6 +83,18 @@ export default function Home() {
                   loop
                   autoPlay
                 />
+=======
+                <div className="relative w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-2xl">
+                  {/* Video element */}
+                  <video
+                    src="/video.mp4"
+                    className="object-cover w-full h-full"
+                    controls // hiện thanh điều khiển play/pause/volume
+                    muted={true} // nếu muốn autoPlay thì muted phải = true
+                    loop={true} // nếu muốn lặp lại thì chuyển sang true
+                  />
+                </div>
+>>>>>>> 9114ea5 (Initial commit)
               </div>
             </div>
           </div>
@@ -578,7 +591,11 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-300 py-12">
+<<<<<<< HEAD
         <div className="inline container">
+=======
+        <div className="w-full max-w-[1280px] mx-auto px-4">
+>>>>>>> 9114ea5 (Initial commit)
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">

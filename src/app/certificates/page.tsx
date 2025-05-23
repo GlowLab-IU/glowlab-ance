@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+=======
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+>>>>>>> 9114ea5 (Initial commit)
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +25,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+<<<<<<< HEAD
 } from "@/components/ui/dropdown-menu";
+=======
+} from "@/components/ui/dropdown-menu"
+>>>>>>> 9114ea5 (Initial commit)
 import {
   Dialog,
   DialogContent,
@@ -26,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+<<<<<<< HEAD
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +49,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+=======
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+>>>>>>> 9114ea5 (Initial commit)
 import {
   AlertCircle,
   ArrowUpDown,
@@ -50,7 +69,11 @@ import {
   Search,
   Trash2,
   Upload,
+<<<<<<< HEAD
 } from "lucide-react";
+=======
+} from "lucide-react"
+>>>>>>> 9114ea5 (Initial commit)
 
 export default function CertificatesPage() {
   return (
@@ -58,9 +81,13 @@ export default function CertificatesPage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Certificates</h1>
+<<<<<<< HEAD
           <p className="text-muted-foreground">
             Manage product certifications and compliance documents
           </p>
+=======
+          <p className="text-muted-foreground">Manage product certifications and compliance documents</p>
+>>>>>>> 9114ea5 (Initial commit)
         </div>
         <Dialog>
           <DialogTrigger asChild>
@@ -72,10 +99,14 @@ export default function CertificatesPage() {
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Add New Certificate</DialogTitle>
+<<<<<<< HEAD
               <DialogDescription>
                 Enter the certificate details and upload the certificate
                 document.
               </DialogDescription>
+=======
+              <DialogDescription>Enter the certificate details and upload the certificate document.</DialogDescription>
+>>>>>>> 9114ea5 (Initial commit)
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
@@ -87,6 +118,7 @@ export default function CertificatesPage() {
                     <SelectValue placeholder="Select product" />
                   </SelectTrigger>
                   <SelectContent>
+<<<<<<< HEAD
                     <SelectItem value="airpurifier">
                       Premium Air Purifier X500
                     </SelectItem>
@@ -100,6 +132,13 @@ export default function CertificatesPage() {
                     <SelectItem value="security">
                       Smart Home Security System
                     </SelectItem>
+=======
+                    <SelectItem value="airpurifier">Premium Air Purifier X500</SelectItem>
+                    <SelectItem value="waterfilter">Eco-Friendly Water Filter</SelectItem>
+                    <SelectItem value="mask">Medical Grade Mask N95</SelectItem>
+                    <SelectItem value="helmet">Industrial Safety Helmet</SelectItem>
+                    <SelectItem value="security">Smart Home Security System</SelectItem>
+>>>>>>> 9114ea5 (Initial commit)
                   </SelectContent>
                 </Select>
               </div>
@@ -126,21 +165,29 @@ export default function CertificatesPage() {
                 <Label htmlFor="certID" className="text-right">
                   Certificate ID
                 </Label>
+<<<<<<< HEAD
                 <Input
                   id="certID"
                   placeholder="Enter certificate ID"
                   className="col-span-3"
                 />
+=======
+                <Input id="certID" placeholder="Enter certificate ID" className="col-span-3" />
+>>>>>>> 9114ea5 (Initial commit)
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="issuer" className="text-right">
                   Issuing Authority
                 </Label>
+<<<<<<< HEAD
                 <Input
                   id="issuer"
                   placeholder="Enter issuing authority"
                   className="col-span-3"
                 />
+=======
+                <Input id="issuer" placeholder="Enter issuing authority" className="col-span-3" />
+>>>>>>> 9114ea5 (Initial commit)
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="issueDate" className="text-right">
@@ -162,11 +209,15 @@ export default function CertificatesPage() {
                 <Label htmlFor="notes" className="text-right">
                   Notes
                 </Label>
+<<<<<<< HEAD
                 <Textarea
                   id="notes"
                   placeholder="Enter additional notes"
                   className="col-span-3"
                 />
+=======
+                <Textarea id="notes" placeholder="Enter additional notes" className="col-span-3" />
+>>>>>>> 9114ea5 (Initial commit)
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="document" className="text-right">
@@ -181,6 +232,7 @@ export default function CertificatesPage() {
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
                         <p className="mb-1 text-sm text-muted-foreground">
+<<<<<<< HEAD
                           <span className="font-semibold">Click to upload</span>{" "}
                           or drag and drop
                         </p>
@@ -193,6 +245,13 @@ export default function CertificatesPage() {
                         type="file"
                         className="hidden"
                       />
+=======
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">PDF, PNG or JPG (MAX. 10MB)</p>
+                      </div>
+                      <input id="dropzone-file" type="file" className="hidden" />
+>>>>>>> 9114ea5 (Initial commit)
                     </label>
                   </div>
                 </div>
@@ -209,11 +268,15 @@ export default function CertificatesPage() {
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+<<<<<<< HEAD
             <Input
               type="search"
               placeholder="Search certificates..."
               className="w-[300px] pl-8"
             />
+=======
+            <Input type="search" placeholder="Search certificates..." className="w-[300px] pl-8" />
+>>>>>>> 9114ea5 (Initial commit)
           </div>
           <Button variant="outline" size="icon">
             <Filter className="h-4 w-4" />
@@ -330,7 +393,11 @@ export default function CertificatesPage() {
                 <TableCell>Jun 30, 2024</TableCell>
                 <TableCell>Jun 30, 2025</TableCell>
                 <TableCell>
+<<<<<<< HEAD
                   <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+=======
+                  <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+>>>>>>> 9114ea5 (Initial commit)
                     <Clock className="mr-1 h-3 w-3" />
                     Expiring Soon
                   </Badge>
@@ -379,7 +446,11 @@ export default function CertificatesPage() {
                 <TableCell>Mar 15, 2024</TableCell>
                 <TableCell>Mar 15, 2025</TableCell>
                 <TableCell>
+<<<<<<< HEAD
                   <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+=======
+                  <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">
+>>>>>>> 9114ea5 (Initial commit)
                     <AlertCircle className="mr-1 h-3 w-3" />
                     Expired
                   </Badge>
@@ -468,9 +539,13 @@ export default function CertificatesPage() {
           </Table>
         </CardContent>
         <CardHeader className="flex flex-row items-center justify-between border-t p-4">
+<<<<<<< HEAD
           <div className="text-xs text-muted-foreground">
             Showing 4 of 96 certificates
           </div>
+=======
+          <div className="text-xs text-muted-foreground">Showing 4 of 96 certificates</div>
+>>>>>>> 9114ea5 (Initial commit)
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled>
               Previous
@@ -482,5 +557,9 @@ export default function CertificatesPage() {
         </CardHeader>
       </Card>
     </div>
+<<<<<<< HEAD
   );
+=======
+  )
+>>>>>>> 9114ea5 (Initial commit)
 }
