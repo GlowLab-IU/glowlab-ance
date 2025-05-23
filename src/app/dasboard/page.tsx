@@ -135,6 +135,22 @@ export default function Dashboard() {
               PRODUCT CERTIFICATION MANAGEMENT
             </span>
           </div>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+          <div className="flex items-center gap-4 ">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-slate-700 bg-[darkgreen] text-slate-300 hover:bg-[darkgreen] hover:text-white"
+            >
+              <Link
+                href="/certification-process"
+                className="flex items-center "
+              >
+                <ShieldCheck className="mr-2 h-4 w-4 " />
+=======
+>>>>>>> a3ce03e
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
@@ -143,6 +159,10 @@ export default function Dashboard() {
             >
               <Link href="/certification-process" className="flex items-center">
                 <ShieldCheck className="mr-2 h-4 w-4" />
+<<<<<<< HEAD
+=======
+>>>>>>> 9114ea5 (Initial commit)
+>>>>>>> a3ce03e
                 Certification Process
               </Link>
             </Button>
