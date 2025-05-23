@@ -3,31 +3,30 @@
 import { useState } from "react";
 import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
 import { AnchorProvider, Program, Idl } from "@project-serum/anchor";
-import { Keypair, SystemProgram, Connection, PublicKey } from "@solana/web3.js";
+import { SystemProgram, Connection, PublicKey } from "@solana/web3.js";
 import idlRaw from "@/idl/skincare_chain.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44f8qUjNqz");
+const programId = new PublicKey("UjmwKxWJkc8dT1cZcVuNa3q4cRxVygyusp4Jst8QzsC");
 const network = "https://api.devnet.solana.com";
-
 export default function RegisterProductPage() {
   const anchorWallet = useAnchorWallet();
   const { connected } = useWallet();
 
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
-  const [skinType, setSkinType] = useState("");
+  const [skin_type, setSkinType] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [status, setStatus] = useState("");
 
   const handleRegister = async () => {
-    if (!anchorWallet) {
-      setStatus("❌ Wallet not connected");
+    if (!anchorWallet || !anchorWallet.publicKey) {
+      setStatus("❌ Wallet not connected or invalid");
       return;
     }
 
-    if (!name || !brand || !skinType || !ingredients) {
+    if (!name || !brand || !skin_type || !ingredients) {
       setStatus("❗ Vui lòng điền đầy đủ thông tin sản phẩm.");
       return;
     }
@@ -40,7 +39,13 @@ export default function RegisterProductPage() {
         commitment: "confirmed",
       });
 
-      const idl = idlRaw as unknown as Idl;
+      if (!idlRaw || !idlRaw.instructions || !idlRaw.accounts) {
+        throw new Error("Invalid IDL structure");
+      }
+      console.log("IDL Raw Structure:", idlRaw);
+      const idl: Idl = JSON.parse(JSON.stringify(idlRaw));
+      console.log("Check IDL kind:", idl.types?.[0]?.type?.kind);
+
       const program = new Program(idl, programId, provider);
       const ingredientList = ingredients.split(",").map((i) => i.trim());
 
@@ -56,7 +61,7 @@ export default function RegisterProductPage() {
       setStatus("📝 Đang ký và gửi giao dịch...");
 
       const tx = await program.methods
-        .registerProduct(name, brand, skinType, ingredientList)
+        .registerProduct(name, brand, skin_type, ingredientList)
         .accounts({
           product: productPDA,
           user: anchorWallet.publicKey,
@@ -89,7 +94,7 @@ export default function RegisterProductPage() {
       />
       <Input
         placeholder="Loại da phù hợp (oily, dry,...)"
-        value={skinType}
+        value={skin_type}
         onChange={(e) => setSkinType(e.target.value)}
       />
       <Input

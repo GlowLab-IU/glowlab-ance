@@ -39,9 +39,8 @@ const groupBoundingBoxes = (boundingBoxes: BoundingBox[]) => {
   return grouped;
 };
 
-const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44f8qUjNqz");
+const programId = new PublicKey("UjmwKxWJkc8dT1cZcVuNa3q4cRxVygyusp4Jst8QzsC");
 const network = "https://api.devnet.solana.com";
-
 export default function ResultMedicalPage() {
   const router = useRouter();
   const { connected } = useWallet();

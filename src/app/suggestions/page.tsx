@@ -9,9 +9,8 @@ import idl from "@/idl/skincare_chain.json";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const programId = new PublicKey("Fg6PaFpoGXkYsidMpWxqSWNujL6jiXAYB44f8qUjNqz");
+const programId = new PublicKey("UjmwKxWJkc8dT1cZcVuNa3q4cRxVygyusp4Jst8QzsC");
 const network = "https://api.devnet.solana.com";
-
 type ProductAccount = {
   name: string;
   brand: string;

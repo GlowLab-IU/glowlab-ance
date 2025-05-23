@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Effaclar Purifying Foaming Gel",
+    "brand": "La Roche-Posay",
+    "skin_type": "oily",
+    "ingredients": ["zinc", "thermal water", "glycerin"]
+  },
+  {
+    "name": "Toleriane Hydrating Gentle Cleanser",
+    "brand": "La Roche-Posay",
+    "skin_type": "dry",
+    "ingredients": ["niacinamide", "glycerin", "ceramide-3"]
+  },
+  {
+    "name": "Cicaplast Baume B5",
+    "brand": "La Roche-Posay",
+    "skin_type": "sensitive",
+    "ingredients": ["panthenol", "madecassoside", "zinc"]
+  },
+  {
+    "name": "Anthelios UV Correct SPF 50",
+    "brand": "La Roche-Posay",
+    "skin_type": "all",
+    "ingredients": ["niacinamide", "ceramides", "vitamin E"]
+  },
+  {
+    "name": "Effaclar Duo (+)",
+    "brand": "La Roche-Posay",
+    "skin_type": "acne-prone",
+    "ingredients": ["niacinamide", "salicylic acid", "zinc"]
+  },
+  {
+    "name": "Lipikar Syndet AP+",
+    "brand": "La Roche-Posay",
+    "skin_type": "dry",
+    "ingredients": ["shea butter", "niacinamide", "aqua posae"]
+  },
+  {
+    "name": "Toleriane Ultra Moisturizer",
+    "brand": "La Roche-Posay",
+    "skin_type": "sensitive",
+    "ingredients": ["thermal water", "neurosensine", "glycerin"]
+  },
+  {
+    "name": "Hydraphase Intense Riche",
+    "brand": "La Roche-Posay",
+    "skin_type": "dry",
+    "ingredients": ["hyaluronic acid", "thermal water", "glycerin"]
+  },
+  {
+    "name": "Micellar Water Ultra",
+    "brand": "La Roche-Posay",
+    "skin_type": "all",
+    "ingredients": ["glycols", "citric acid", "glycerin"]
+  },
+  {
+    "name": "Pure Vitamin C10 Serum",
+    "brand": "La Roche-Posay",
+    "skin_type": "aging",
+    "ingredients": ["ascorbic acid", "salicylic acid", "neurosensine"]
+  },
+  {
+    "name": "Mela-D Pigment Control",
+    "brand": "La Roche-Posay",
+    "skin_type": "pigmented",
+    "ingredients": ["glycolic acid", "kojic acid", "vitamin C"]
+  },
+  {
+    "name": "Lipikar Balm AP+M",
+    "brand": "La Roche-Posay",
+    "skin_type": "very dry",
+    "ingredients": ["shea butter", "niacinamide", "thermal water"]
+  },
+  {
+    "name": "Toleriane Double Repair",
+    "brand": "La Roche-Posay",
+    "skin_type": "combination",
+    "ingredients": ["ceramide-3", "niacinamide", "prebiotics"]
+  },
+  {
+    "name": "Effaclar Micellar Water",
+    "brand": "La Roche-Posay",
+    "skin_type": "oily",
+    "ingredients": ["zinc", "glycols", "glycerin"]
+  },
+  {
+    "name": "Hyalu B5 Serum",
+    "brand": "La Roche-Posay",
+    "skin_type": "aging",
+    "ingredients": ["hyaluronic acid", "vitamin B5", "madecassoside"]
+  },
+  {
+    "name": "Cicaplast Hands",
+    "brand": "La Roche-Posay",
+    "skin_type": "dry",
+    "ingredients": ["niacinamide", "shea butter", "glycerin"]
+  },
+  {
+    "name": "Anthelios Mineral SPF 50",
+    "brand": "La Roche-Posay",
+    "skin_type": "sensitive",
+    "ingredients": ["titanium dioxide", "thermal water", "zinc oxide"]
+  },
+  {
+    "name": "Effaclar Astringent Toner",
+    "brand": "La Roche-Posay",
+    "skin_type": "oily",
+    "ingredients": ["salicylic acid", "lipo-hydroxy acid", "water"]
+  },
+  {
+    "name": "Pigmentclar Eyes",
+    "brand": "La Roche-Posay",
+    "skin_type": "all",
+    "ingredients": ["phE-Resorcinol", "caffeine", "niacinamide"]
+  },
+  {
+    "name": "Toleriane Sensitive Creme",
+    "brand": "La Roche-Posay",
+    "skin_type": "sensitive",
+    "ingredients": ["glycerin", "vitamin B6", "prebiotic thermal water"]
+  }
+]
