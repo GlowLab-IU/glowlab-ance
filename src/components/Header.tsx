@@ -27,6 +27,8 @@ const Header = () => {
           <Link href="/">Home</Link>
           <Link href="/camera">Scan</Link>
           <Link href="/result-medical">Result</Link>
+          <Link href="/dasboard">Dasboard</Link>
+
           <WalletMultiButton />
         </div>
 

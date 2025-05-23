@@ -1,26 +1,39 @@
-import { Toaster } from "sonner";
+import type { ReactNode } from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 import { WalletProvider } from "@/components/WalletProvider";
 import Header from "@/components/Header";
+import { Toaster } from "sonner";
+const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "GlowChain",
-  description: "Acne AI + Web3",
+export const metadata: Metadata = {
+  title: "GlowChain - AI & Blockchain Powered Acne Treatment Platform",
+  description:
+    "Harnessing AI & Blockchain to Deliver Transparent, Personalized Acne Treatment Solutions",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <body className="bg-background text-foreground">
-        <WalletProvider>
-          <Toaster />
-          <Header />
-          <main className="pt-20 px-4">{children}</main>
-        </WalletProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} bg-background text-foreground`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <WalletProvider>
+            <Toaster />
+            <Header />
+            <main className="pt-15">{children}</main>
+          </WalletProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
