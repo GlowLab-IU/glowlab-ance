@@ -1,16 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import axios from "axios"
 import { Facebook, Instagram, Menu, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AcneUploader } from "@/components/acne-uploader"
 import { AcneResults } from "@/components/acne-results"
+import { inferSkinType } from "../suggestions/skintypeMock";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function ScanAcnePage() {
   const [scanStage, setScanStage] = useState<"instructions" | "uploading" | "scanning" | "results">("instructions")
@@ -21,6 +24,22 @@ export default function ScanAcnePage() {
     alerts: string[]
     rawData?: any
   }>(null)
+
+  const [skinType, setSkinType] = useState<string>("oily");
+  const { connected } = useWallet();
+  const router = useRouter();
+
+  // Xử lý khi có kết quả AI thì xác định skinType
+  useEffect(() => {
+    if (acneResults) {
+      const acneStats: Record<string, number> = {};
+      acneResults.types.forEach((item) => {
+        acneStats[item.name] = item.count;
+      });
+      const inferred = inferSkinType(acneStats);
+      setSkinType(inferred);
+    }
+  }, [acneResults]);
 
   // Đảm bảo upload chỉ chạy sau khi set ảnh xong
   const handleFileSelected = async (file: File) => {
@@ -276,9 +295,20 @@ export default function ScanAcnePage() {
                 </TabsContent>
               </Tabs>
 
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-10">
                 <Button onClick={resetScan} variant="outline">
                   Scan Again
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!connected) {
+                      alert("Please connect your wallet to view suggestions.");
+                      return;
+                    }
+                    router.push("/suggestions?skin=" + skinType);
+                  }}
+                >
+                  Suggest Cosmetics
                 </Button>
               </div>
             </div>
