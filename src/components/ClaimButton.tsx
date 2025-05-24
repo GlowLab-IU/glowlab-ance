@@ -1,10 +1,9 @@
 "use client";
 import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useRouter } from "next/navigation";
-import { uploadMetadataToPinata, AcneResult } from "@/app/Pinata/pinataUpload";
 import { mintNFT } from "@/libs/shyft";
 import type { MintNFTRequestBody } from "@/types";
+import { uploadMetadataToPinata, AcneResult } from "@/app/Pinata/pinataUpload";
 import { Button } from "@/components/ui/button";
 
 interface ClaimButtonProps {
@@ -12,29 +11,28 @@ interface ClaimButtonProps {
   onSuccess: () => void;
 }
 
-/**
- * Button to claim (mint) the Acne Diagnosis NFT and then call onSuccess.
- */
 export const ClaimButton: React.FC<ClaimButtonProps> = ({
   result,
   onSuccess,
 }) => {
   const { publicKey, connected } = useWallet();
-  const router = useRouter();
 
   const handleClaim = async () => {
     if (!connected || !publicKey) {
-      alert("Please connect your wallet first.");
+      alert("Please connect your wallet.");
       return;
     }
+
     try {
-      // 1. Upload metadata to IPFS via Pinata
-      const uri = await uploadMetadataToPinata(result);
-      // 2. Mint NFT to user's wallet
+      // 1) Pin metadata via API
+      const { uri, ipfsHash } = await uploadMetadataToPinata(result);
+      console.log("Pinata URI:", uri, "Hash:", ipfsHash);
+
+      // 2) Mint using ipfs://<hash>
       const body: MintNFTRequestBody = {
-        network: "devnet", // or "mainnet-beta"
-        receiver: publicKey.toBase58(), // recipient wallet address
-        uri, // metadata URI
+        network: "devnet",
+        receiver: publicKey.toBase58(),
+        uri: `ipfs://${ipfsHash}`,
         max_supply: 1,
         seller_fee_basis_points: 0,
         creators: [
@@ -44,12 +42,14 @@ export const ClaimButton: React.FC<ClaimButtonProps> = ({
           },
         ],
       };
-      await mintNFT(body);
-      alert("🎉 NFT minted successfully!");
+      console.log("Mint body:", body);
+
+      const res = await mintNFT(body);
+      console.log("Mint success:", res);
+      alert("🎉 NFT minted!");
       onSuccess();
-      router.push("/result-medical");
     } catch (err: any) {
-      console.error("Mint failed:", err);
+      console.error("Claim failed:", err);
       alert("Mint NFT failed: " + err.message);
     }
   };

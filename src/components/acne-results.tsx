@@ -1,61 +1,36 @@
+"use client";
+import React from "react";
 import { AlertTriangle, Eye, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-interface AcneType {
+export interface AcneType {
   name: string;
   count: number;
   severity: "low" | "medium" | "high";
 }
 
-interface AcneResultsProps {
+export interface AcneResultsProps {
   results: {
     types: AcneType[];
     alerts: string[];
-    rawData?: any;
+    rawData?: {
+      output_image?: string;
+    };
     overallSeverity?: "low" | "medium" | "high";
     totalScore?: number;
     skinType?: string;
     composition?: string[];
+    compositionInfo?: Record<string, string>;
   };
 }
-
-const ACNE_LABELS: Record<string, string> = {
-  acne_scars: "Acne Scars",
-  blackhead: "Blackheads",
-  cystic: "Cystic Acne",
-  flat_wart: "Flat Warts",
-  folliculitis: "Folliculitis",
-  keloid: "Keloid Scars",
-  milium: "Milia",
-  papular: "Papules",
-  purulent: "Pustules",
-  "sebo-crystan-conglo": "Sebum Conglomerates",
-  syringoma: "Syringomas",
-  whitehead: "Whiteheads",
-};
-
-const ACNE_COLORS: Record<string, string> = {
-  blackhead: "#fbbf24", // yellow
-  whitehead: "#34d399", // green
-  milium: "#a3e635", // light green
-  flat_wart: "#f472b6", // pink
-  syringoma: "#818cf8", // light blue
-  papular: "#f59e42", // orange
-  purulent: "#facc15", // dark yellow
-  folliculitis: "#60a5fa", // blue
-  "sebo-crystan-conglo": "#f87171", // light red
-  cystic: "#ef4444", // red
-  acne_scars: "#a78bfa", // light purple
-  keloid: "#6366f1", // dark purple
-};
 
 export function AcneResults({ results }: AcneResultsProps) {
   const getSeverityColor = (severity: string) => {
@@ -84,29 +59,24 @@ export function AcneResults({ results }: AcneResultsProps) {
     }
   };
 
-  const filteredResults = results.types.filter((type) => type.count > 0);
+  const filteredResults = results.types.filter((t) => t.count > 0);
 
-  const getTotalAcneCount = () => {
-    return filteredResults.reduce((total, type) => total + type.count, 0);
-  };
+  const getTotalAcneCount = () =>
+    filteredResults.reduce((sum, t) => sum + t.count, 0);
 
   const getOverallSeverity = () => {
     if (results.overallSeverity) return results.overallSeverity;
-    if (filteredResults.some((type) => type.severity === "high")) return "high";
-    if (filteredResults.some((type) => type.severity === "medium"))
-      return "medium";
+    if (filteredResults.some((t) => t.severity === "high")) return "high";
+    if (filteredResults.some((t) => t.severity === "medium")) return "medium";
     return "low";
   };
 
   const getRecommendationMessage = () => {
-    const overallSeverity = getOverallSeverity();
-    const totalCount = getTotalAcneCount();
-
-    if (totalCount === 0) {
+    const total = getTotalAcneCount();
+    const sev = getOverallSeverity();
+    if (total === 0)
       return "Great! No acne detected. Keep up your current skincare routine.";
-    }
-
-    switch (overallSeverity) {
+    switch (sev) {
       case "high":
         return "Severe acne condition. You should consult a dermatologist for appropriate treatment.";
       case "medium":
@@ -116,6 +86,21 @@ export function AcneResults({ results }: AcneResultsProps) {
       default:
         return "Maintain a good skincare routine to prevent acne.";
     }
+  };
+
+  const ACNE_COLORS: Record<string, string> = {
+    blackhead: "#fbbf24",
+    whitehead: "#34d399",
+    milium: "#a3e635",
+    flat_wart: "#f472b6",
+    syringoma: "#818cf8",
+    papular: "#f59e42",
+    purulent: "#facc15",
+    folliculitis: "#60a5fa",
+    "sebo-crystan-conglo": "#f87171",
+    cystic: "#ef4444",
+    acne_scars: "#a78bfa",
+    keloid: "#6366f1",
   };
 
   return (
@@ -142,7 +127,7 @@ export function AcneResults({ results }: AcneResultsProps) {
             AI Analysis Results
           </CardTitle>
           <CardDescription>
-            {getTotalAcneCount() > 0
+            {filteredResults.length > 0
               ? `Detected ${getTotalAcneCount()} acne spots across ${
                   filteredResults.length
                 } types.`
@@ -159,93 +144,90 @@ export function AcneResults({ results }: AcneResultsProps) {
             )}
           </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <div className="space-y-4">
-            <Alert
-              className={`border-l-4 ${
-                getOverallSeverity() === "high"
-                  ? "border-l-red-500 bg-red-50"
-                  : getOverallSeverity() === "medium"
-                  ? "border-l-yellow-500 bg-yellow-50"
-                  : "border-l-green-500 bg-green-50"
-              }`}
-            >
-              <Info className="h-4 w-4" />
-              <AlertTitle>Overall Evaluation</AlertTitle>
-              <AlertDescription>{getRecommendationMessage()}</AlertDescription>
-            </Alert>
+          <Alert
+            className={`border-l-4 ${
+              getOverallSeverity() === "high"
+                ? "border-l-red-500 bg-red-50"
+                : getOverallSeverity() === "medium"
+                ? "border-l-yellow-500 bg-yellow-50"
+                : "border-l-green-500 bg-green-50"
+            }`}
+          >
+            <Info className="h-4 w-4" />
+            <AlertTitle>Overall Evaluation</AlertTitle>
+            <AlertDescription>{getRecommendationMessage()}</AlertDescription>
+          </Alert>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredResults.map((type, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-lg border-2 ${getSeverityColor(
-                    type.severity
-                  )}`}
-                  style={{ borderLeft: `8px solid ${ACNE_COLORS[type.name]}` }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">
-                        {getSeverityIcon(type.severity)}
-                      </span>
-                      <h3 className="font-semibold">
-                        {ACNE_LABELS[type.name] || type.name}
-                      </h3>
-                    </div>
-                    <Badge className="bg-white">{type.count} spots</Badge>
-                  </div>
-                  <p className="text-sm opacity-80">
-                    Severity:{" "}
-                    {type.severity === "low"
-                      ? "Mild"
-                      : type.severity === "medium"
-                      ? "Moderate"
-                      : "Severe"}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {getTotalAcneCount() > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-3">
-                  Acne Type Distribution
-                </h3>
-                <div className="flex h-4 w-full rounded-full overflow-hidden border">
-                  {filteredResults.map((type, idx) => {
-                    const percentage = (type.count / getTotalAcneCount()) * 100;
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          width: `${percentage}%`,
-                          background: ACNE_COLORS[type.name],
-                        }}
-                        title={`${type.name}: ${type.count}`}
-                      />
-                    );
-                  })}
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {filteredResults.map((type, idx) => (
-                    <span key={idx} className="flex items-center gap-1 text-xs">
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: 12,
-                          height: 12,
-                          borderRadius: "50%",
-                          background: ACNE_COLORS[type.name],
-                        }}
-                      />
-                      {ACNE_LABELS[type.name] || type.name}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            {filteredResults.map((type, idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-lg border-2 ${getSeverityColor(
+                  type.severity
+                )}`}
+                style={{ borderLeft: `8px solid ${ACNE_COLORS[type.name]}` }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">
+                      {getSeverityIcon(type.severity)}
                     </span>
-                  ))}
+                    <h3 className="font-semibold">{type.name}</h3>
+                  </div>
+                  <Badge className="bg-white">{type.count} spots</Badge>
                 </div>
+                <p className="text-sm opacity-80">
+                  Severity:{" "}
+                  {type.severity === "low"
+                    ? "Mild"
+                    : type.severity === "medium"
+                    ? "Moderate"
+                    : "Severe"}
+                </p>
               </div>
-            )}
+            ))}
           </div>
+
+          {filteredResults.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-3">
+                Acne Type Distribution
+              </h3>
+              <div className="flex h-4 w-full rounded-full overflow-hidden border">
+                {filteredResults.map((type, idx) => {
+                  const percentage = (type.count / getTotalAcneCount()) * 100;
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        width: `${percentage}%`,
+                        background: ACNE_COLORS[type.name],
+                      }}
+                      title={`${type.name}: ${type.count}`}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {filteredResults.map((type, idx) => (
+                  <span key={idx} className="flex items-center gap-1 text-xs">
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        background: ACNE_COLORS[type.name],
+                      }}
+                    />
+                    {type.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -255,8 +237,8 @@ export function AcneResults({ results }: AcneResultsProps) {
             <AlertTriangle className="h-5 w-5 text-orange-500" />
             Health Warnings
           </h3>
-          {results.alerts.map((alert, index) => (
-            <Alert key={index} variant="destructive">
+          {results.alerts.map((alert, idx) => (
+            <Alert key={idx} variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Important Notice</AlertTitle>
               <AlertDescription>{alert}</AlertDescription>
@@ -265,7 +247,7 @@ export function AcneResults({ results }: AcneResultsProps) {
         </div>
       )}
 
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-50 border-blue-200 mt-6">
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
             <Info className="h-5 w-5 text-blue-600 mt-0.5" />
