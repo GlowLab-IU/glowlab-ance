@@ -1,9 +1,8 @@
 "use client";
 import React from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { mintNFT } from "@/libs/shyft";
-import type { MintNFTRequestBody } from "@/types";
 import { uploadMetadataToPinata, AcneResult } from "@/app/Pinata/pinataUpload";
+import { mintWithCrossmint } from "@/utils/crossmint";
 import { Button } from "@/components/ui/button";
 
 interface ClaimButtonProps {
@@ -24,33 +23,17 @@ export const ClaimButton: React.FC<ClaimButtonProps> = ({
     }
 
     try {
-      // 1) Pin metadata via API
-      const { uri, ipfsHash } = await uploadMetadataToPinata(result);
-      console.log("Pinata URI:", uri, "Hash:", ipfsHash);
+      // 1) upload metadata JSON to Pinata
+      const { uri } = await uploadMetadataToPinata(result);
 
-      // 2) Mint using ipfs://<hash>
-      const body: MintNFTRequestBody = {
-        network: "devnet",
-        receiver: publicKey.toBase58(),
-        uri: `ipfs://${ipfsHash}`,
-        max_supply: 1,
-        seller_fee_basis_points: 0,
-        creators: [
-          {
-            address: "G5qtEie1iVQVAGNx7RDqiazUaLXh6g9AevsxsFdR6HmX",
-            share: 100,
-          },
-        ],
-      };
-      console.log("Mint body:", body);
+      // 2) mint the NFT via Crossmint
+      const mintResponse = await mintWithCrossmint(uri, publicKey.toBase58());
 
-      const res = await mintNFT(body);
-      console.log("Mint success:", res);
-      alert("🎉 NFT minted!");
+      console.log("Mint successful:", mintResponse);
       onSuccess();
     } catch (err: any) {
-      console.error("Claim failed:", err);
-      alert("Mint NFT failed: " + err.message);
+      console.error(err);
+      alert(err.message);
     }
   };
 
