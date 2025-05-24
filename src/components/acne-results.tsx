@@ -1,24 +1,30 @@
-import { AlertTriangle, Eye, Info } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { AlertTriangle, Eye, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface AcneType {
-  name: string
-  count: number
-  severity: "low" | "medium" | "high"
+  name: string;
+  count: number;
+  severity: "low" | "medium" | "high";
 }
 
 interface AcneResultsProps {
   results: {
-    types: AcneType[]
-    alerts: string[]
-    rawData?: any
-    overallSeverity?: "low" | "medium" | "high"
-    totalScore?: number
-    skinType?: string
-    composition?: string[]
-  }
+    types: AcneType[];
+    alerts: string[];
+    rawData?: any;
+    overallSeverity?: "low" | "medium" | "high";
+    totalScore?: number;
+    skinType?: string;
+    composition?: string[];
+  };
 }
 
 const ACNE_LABELS: Record<string, string> = {
@@ -34,7 +40,7 @@ const ACNE_LABELS: Record<string, string> = {
   "sebo-crystan-conglo": "Sebum Conglomerates",
   syringoma: "Syringomas",
   whitehead: "Whiteheads",
-}
+};
 
 const ACNE_COLORS: Record<string, string> = {
   blackhead: "#fbbf24", // yellow
@@ -49,72 +55,72 @@ const ACNE_COLORS: Record<string, string> = {
   cystic: "#ef4444", // red
   acne_scars: "#a78bfa", // light purple
   keloid: "#6366f1", // dark purple
-}
+};
 
 export function AcneResults({ results }: AcneResultsProps) {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "low":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "high":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case "low":
-        return "🟢"
+        return "🟢";
       case "medium":
-        return "🟡"
+        return "🟡";
       case "high":
-        return "🔴"
+        return "🔴";
       default:
-        return "⚪"
+        return "⚪";
     }
-  }
+  };
 
-  const filteredResults = results.types.filter((type) => type.count > 0)
+  const filteredResults = results.types.filter((type) => type.count > 0);
 
   const getTotalAcneCount = () => {
-    return filteredResults.reduce((total, type) => total + type.count, 0)
-  }
+    return filteredResults.reduce((total, type) => total + type.count, 0);
+  };
 
   const getOverallSeverity = () => {
-    if (results.overallSeverity) return results.overallSeverity
-    if (filteredResults.some((type) => type.severity === "high")) return "high"
-    if (filteredResults.some((type) => type.severity === "medium")) return "medium"
-    return "low"
-  }
+    if (results.overallSeverity) return results.overallSeverity;
+    if (filteredResults.some((type) => type.severity === "high")) return "high";
+    if (filteredResults.some((type) => type.severity === "medium"))
+      return "medium";
+    return "low";
+  };
 
   const getRecommendationMessage = () => {
-    const overallSeverity = getOverallSeverity()
-    const totalCount = getTotalAcneCount()
+    const overallSeverity = getOverallSeverity();
+    const totalCount = getTotalAcneCount();
 
     if (totalCount === 0) {
-      return "Great! No acne detected. Keep up your current skincare routine."
+      return "Great! No acne detected. Keep up your current skincare routine.";
     }
 
     switch (overallSeverity) {
       case "high":
-        return "Severe acne condition. You should consult a dermatologist for appropriate treatment."
+        return "Severe acne condition. You should consult a dermatologist for appropriate treatment.";
       case "medium":
-        return "Moderate acne condition. Maintain a consistent skincare routine with suitable products."
+        return "Moderate acne condition. Maintain a consistent skincare routine with suitable products.";
       case "low":
-        return "Mild acne condition. It can be improved with proper skincare products."
+        return "Mild acne condition. It can be improved with proper skincare products.";
       default:
-        return "Maintain a good skincare routine to prevent acne."
+        return "Maintain a good skincare routine to prevent acne.";
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
-       
-       {results.rawData?.output_image && (
+      {results.rawData?.output_image && (
         <div className="flex flex-col items-center my-4">
           <img
             src={
@@ -128,7 +134,7 @@ export function AcneResults({ results }: AcneResultsProps) {
           />
         </div>
       )}
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -242,8 +248,6 @@ export function AcneResults({ results }: AcneResultsProps) {
           </div>
         </CardContent>
       </Card>
-      
-      
 
       {results.alerts.length > 0 && (
         <div className="space-y-3">
@@ -260,8 +264,6 @@ export function AcneResults({ results }: AcneResultsProps) {
           ))}
         </div>
       )}
-
-
 
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="pt-6">

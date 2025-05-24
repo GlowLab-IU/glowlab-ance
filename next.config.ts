@@ -2,12 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-};
-
-module.exports = {
   images: {
-    domains: ['raw.githubusercontent.com'],
+    domains: ["raw.githubusercontent.com"],
   },
-}
+};
 
 export default nextConfig;
