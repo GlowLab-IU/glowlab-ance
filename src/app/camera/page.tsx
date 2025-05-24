@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AcneUploader } from "@/components/acne-uploader";
 import { AcneResults } from "@/components/acne-results";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { claimNFT } from "@/app/camera/claimNFT";
 
 export default function ScanAcnePage() {
   const [scanStage, setScanStage] = useState<
@@ -416,22 +417,12 @@ export default function ScanAcnePage() {
                 <Button onClick={resetScan} variant="outline">
                   Scan Again
                 </Button>
-                <Button
-                  onClick={() => {
-                    if (!connected) {
-                      alert("Please connect your wallet to view suggestions.");
-                      return;
-                    }
-
-                    const compositionJSON = JSON.stringify(composition);
-                    router.push(
-                      `/suggestions?skinType=${skinType}&composition=${encodeURIComponent(
-                        compositionJSON
-                      )}`
-                    );
-                  }}
-                >
-                  Suggest Cosmetics
+                <Button onClick={(e) => {
+                  if (acneResults) {
+                    claimNFT(acneResults.rawData);
+                  }
+                }}>
+                  Claim NFT
                 </Button>
               </div>
             </div>
