@@ -1,16 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import axios from "axios";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Facebook, Instagram, Menu, X } from "lucide-react";
 
-export default function CameraPage() {
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AcneUploader } from "@/components/acne-uploader";
+import { AcneResults } from "@/components/acne-results";
+import { inferSkinType } from "@/app/suggestions/skintypeMock";
+import { useWallet } from "@solana/wallet-adapter-react";
+import SuggestionPanel from "@/components/SuggestionPanel";
+
+export default function ScanAcnePage() {
+  const [scanStage, setScanStage] = useState<
+    "instructions" | "uploading" | "scanning" | "results"
+  >("instructions");
+  const [progress, setProgress] = useState(0);
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [shouldUpload, setShouldUpload] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [acneResults, setAcneResults] = useState<null | {
+    types: Array<{
+      name: string;
+      count: number;
+      severity: "low" | "medium" | "high";
+    }>;
+    alerts: string[];
+    rawData?: any;
+  }>(null);
+
+  const [showSuggestionPanel, setShowSuggestionPanel] = useState(false);
+
+  const [skinType, setSkinType] = useState<string>("oily");
+  const { connected } = useWallet();
   const router = useRouter();
+  const [showResults, setShowResults] = useState(false);
+
+  // Xử lý khi có kết quả AI thì xác định skinType
+  useEffect(() => {
+    if (acneResults) {
+      const acneStats: Record<string, number> = {};
+      acneResults.types.forEach((item) => {
+        acneStats[item.name] = item.count;
+      });
+      const inferred = inferSkinType(acneStats);
+      setSkinType(inferred);
+    }
+  }, [acneResults]);
+
+  // Đảm bảo upload chỉ chạy sau khi set ảnh xong
+  const handleFileSelected = async (file: File) => {
+    const objectURL = URL.createObjectURL(file);
+    setImageUri(objectURL);
+    setScanStage("uploading");
+    setTimeout(() => handleUpload(file), 100);
+  };
 
   const loadDefaultImage = async () => {
     try {
@@ -20,89 +67,372 @@ export default function CameraPage() {
       const blob = await response.blob();
       const objectURL = URL.createObjectURL(blob);
       setImageUri(objectURL);
+      setScanStage("uploading");
+      setTimeout(() => handleUpload(blob), 100);
     } catch (error) {
-      console.log(error);
+      alert("Không thể tải ảnh mẫu.");
     }
   };
 
-  const handleChooseImage = async () => {
-    try {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
-      input.onchange = async (e: any) => {
-        const file = e.target.files[0];
-        const objectURL = URL.createObjectURL(file);
-        setImageUri(objectURL);
-        setShouldUpload(true);
-      };
-      input.click();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const handleUpload = async (fileOrBlob: File | Blob) => {
+    setProgress(0);
+    setScanStage("uploading");
+    let uploadProgress = 0;
+    const uploadInterval = setInterval(() => {
+      uploadProgress += 10;
+      setProgress(uploadProgress);
+      if (uploadProgress >= 100) clearInterval(uploadInterval);
+    }, 120);
 
-  const handleUpload = async () => {
     try {
-      if (!imageUri) return;
-      setLoading(true);
-      const blob = await (await fetch(imageUri)).blob();
       const formData = new FormData();
-      formData.append("image", blob);
-
+      formData.append("image", fileOrBlob);
+      //https://acne10.aiotlab.io.vn/upload_image
+      //https://inspired-bear-emerging.ngrok-free.app/upload_image
       const response = await axios.post(
-        "https://acne10.aiotlab.io.vn/upload_image",
+        "https://inspired-bear-emerging.ngrok-free.app/upload_image",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
-      const result = response.data;
-      setLoading(false);
-      setShouldUpload(false);
-
-      sessionStorage.setItem("ai_result", JSON.stringify(response.data));
-      router.push("/result-medical");
+      clearInterval(uploadInterval);
+      setProgress(100);
+      setScanStage("scanning");
+      setTimeout(() => {
+        const processedResults = processAIResults(response.data);
+        setAcneResults(processedResults);
+        setScanStage("results");
+        setProgress(0);
+      }, 800);
     } catch (error) {
-      console.error("Error uploading image:", error);
-      setLoading(false);
-      setShouldUpload(false);
+      clearInterval(uploadInterval);
+      setScanStage("instructions");
+      setProgress(0);
+      alert("Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.");
     }
   };
 
+  // Map key API về đúng key UI nếu cần
+  const processAIResults = (aiData: any) => {
+    const types: Array<{
+      name: string;
+      count: number;
+      severity: "low" | "medium" | "high";
+    }> = [];
+    const alerts: string[] = [];
+
+    // Bảng điểm severity
+    const severityPoints: Record<string, number> = {
+      blackhead: 1,
+      whitehead: 1,
+      milium: 1,
+      flat_wart: 1,
+      syringoma: 1,
+      papular: 2,
+      purulent: 2,
+      folliculitis: 2,
+      "sebo-crystan-conglo": 2,
+      cystic: 3,
+      acne_scars: 3,
+      keloid: 3,
+    };
+
+    // Danh sách các loại mụn hỗ trợ
+    const acneTypes = Object.keys(severityPoints);
+
+    // Đếm số lượng từng loại mụn
+    const countMap: Record<string, number> = {};
+    if (Array.isArray(aiData.bounding_boxes)) {
+      aiData.bounding_boxes.forEach((box: any) => {
+        const key = box.class_id;
+        if (acneTypes.includes(key)) {
+          countMap[key] = (countMap[key] || 0) + 1;
+        }
+      });
+    }
+
+    // Map sang format types (chỉ lấy count >= 1)
+    acneTypes.forEach((name) => {
+      const count = countMap[name] || 0;
+      if (count > 0) {
+        // Gán severity từng loại dựa trên điểm
+        let severity: "low" | "medium" | "high" = "low";
+        if (severityPoints[name] === 3) severity = "high";
+        else if (severityPoints[name] === 2) severity = "medium";
+        types.push({ name, count, severity });
+      }
+    });
+
+    // Tính tổng điểm để xác định mức độ nghiêm trọng tổng thể
+    const totalScore = Object.entries(countMap).reduce(
+      (sum, [acne, count]) => sum + (severityPoints[acne] || 0) * count,
+      0
+    );
+    let overallSeverity: "low" | "medium" | "high" = "low";
+    if (totalScore > 20) overallSeverity = "high";
+    else if (totalScore > 10) overallSeverity = "medium";
+
+    // Alert nếu có mụn nang
+    if (countMap["cystic"] && countMap["cystic"] > 0) {
+      alerts.push(
+        "Phát hiện mụn nang nghiêm trọng. Nên tham khảo ý kiến bác sĩ da liễu."
+      );
+    }
+
+    return {
+      types,
+      alerts,
+      rawData: aiData,
+      overallSeverity, // truyền thêm mức độ tổng thể
+      totalScore,
+    };
+  };
+
+  const resetScan = () => {
+    setScanStage("instructions");
+    setProgress(0);
+    setAcneResults(null);
+    setImageUri(null);
+    setShowResults(false);
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-10">
-      <h2 className="text-2xl font-semibold mb-6">Scan Your Skin</h2>
+    <div className="flex min-h-screen flex-col">
+      <main className="flex-1 container py-8 md:py-12">
+        <div className="mx-auto max-w-3xl">
+          <h1 className="text-3xl font-bold tracking-tighter mb-6 text-center">
+            Scan Your Acne
+          </h1>
+          <p className="text-muted-foreground text-center mb-8">
+            Get personalized skincare recommendations based on AI analysis of
+            your skin condition
+          </p>
 
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">Image Preview</CardHeader>
-        <CardContent>
-          <div className="w-full h-64 border rounded-md flex items-center justify-center overflow-hidden">
-            {imageUri ? (
-              <img
-                src={imageUri}
-                alt="Preview"
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <span className="text-muted-foreground">No Image Selected</span>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          {scanStage === "instructions" && (
+            <div className="space-y-8">
+              <div className="bg-slate-50 rounded-lg p-6 space-y-4">
+                <h2 className="text-xl font-semibold">Instructions</h2>
+                <ul className="space-y-3">
+                  <li className="flex gap-3">
+                    <div className="bg-primary/10 rounded-full h-6 w-6 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-primary font-medium text-sm">
+                        1
+                      </span>
+                    </div>
+                    <p>Upload a clear photo of your face</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <div className="bg-primary/10 rounded-full h-6 w-6 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-primary font-medium text-sm">
+                        2
+                      </span>
+                    </div>
+                    <p>
+                      Ensure good lighting and no makeup for accurate results
+                    </p>
+                  </li>
+                  <li className="flex gap-3">
+                    <div className="bg-primary/10 rounded-full h-6 w-6 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-primary font-medium text-sm">
+                        3
+                      </span>
+                    </div>
+                    <p>Position your face in the center of the frame</p>
+                  </li>
+                  <li className="flex gap-3">
+                    <div className="bg-primary/10 rounded-full h-6 w-6 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-primary font-medium text-sm">
+                        4
+                      </span>
+                    </div>
+                    <p>Wait for AI analysis to complete</p>
+                  </li>
+                </ul>
+              </div>
 
-      <div className="flex gap-2 mt-6">
-        <Button variant="secondary" onClick={loadDefaultImage}>
-          Load Default
-        </Button>
-        <Button onClick={handleChooseImage}>Choose Image</Button>
-        {shouldUpload && (
-          <Button onClick={handleUpload} disabled={loading || !imageUri}>
-            {loading ? "Uploading..." : "Upload"}
-          </Button>
-        )}
-      </div>
+              <AcneUploader onFileSelected={handleFileSelected} />
+
+              <div className="text-center">
+                <Button variant="outline" onClick={loadDefaultImage}>
+                  Try with Sample Image
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {(scanStage === "uploading" || scanStage === "scanning") && (
+            <div className="space-y-8 text-center">
+              <div className="bg-slate-50 rounded-lg p-8 space-y-6">
+                {imageUri && (
+                  <div className="relative h-48 w-48 mx-auto rounded-lg overflow-hidden border">
+                    <img
+                      src={imageUri || "/placeholder.svg"}
+                      alt="Uploaded image"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <h2 className="text-xl font-semibold">
+                    {scanStage === "uploading"
+                      ? "Uploading your photo..."
+                      : "Analyzing your skin..."}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {scanStage === "uploading"
+                      ? "Please wait while we upload your photo"
+                      : "Our AI is analyzing your skin condition"}
+                  </p>
+                </div>
+
+                <Progress value={progress} className="w-full" />
+
+                <p className="text-sm text-muted-foreground">
+                  {scanStage === "uploading"
+                    ? `Upload progress: ${progress}%`
+                    : "Detecting acne types and severity..."}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {scanStage === "results" && acneResults && (
+            <div className="space-y-8">
+              <Tabs defaultValue="results" className="w-full">
+                <div className="relative flex justify-center my-6">
+                  {/* Khung màu xám sau cùng */}
+                  <div className="bg-gray-300 w-[320px] h-14 rounded-md absolute top-0 left-1/2 -translate-x-1/2 z-0" />
+
+                  {/* Khung màu trắng ở giữa */}
+                  <div className="bg-white w-[280px] h-12 rounded-md absolute top-1 left-1/2 -translate-x-1/2 z-10" />
+
+                  {/* Dòng chữ đè lên khung trắng */}
+                  <div className="relative z-20 text-xl font-semibold text-gray-800 flex items-center justify-center h-12">
+                    Acne Detection Results
+                  </div>
+                </div>
+
+                <TabsContent value="results" className="mt-6">
+                  {/* Hiển thị ảnh kết quả AI (không bị blur) */}
+                  {acneResults?.rawData?.output_image && (
+                    <div className="flex flex-col items-center my-6">
+                      <img
+                        src={
+                          acneResults.rawData.output_image.startsWith("http")
+                            ? acneResults.rawData.output_image
+                            : `data:image/jpeg;base64,${acneResults.rawData.output_image}`
+                        }
+                        alt="AI Analysis Result"
+                        className="rounded-lg border-2 border-gray-200 shadow-lg max-w-full h-auto"
+                        style={{ maxHeight: 400 }}
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        AI Detection Results
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Nút để hiển thị kết quả nếu chưa được hiển thị */}
+                  {!showResults && (
+                    <div className="text-center my-8">
+                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-lg border-2 border-dashed border-blue-200">
+                        <div className="mb-4">
+                          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="32"
+                              height="32"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="text-blue-600"
+                            >
+                              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                            Analysis Complete!
+                          </h3>
+                          <p className="text-gray-600 mb-6">
+                            Your skin analysis is ready. Click the button below
+                            to view your detailed results and personalized
+                            recommendations.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            if (!connected) {
+                              alert(
+                                "Please connect your wallet to view suggestions."
+                              );
+                              return;
+                            }
+                            setShowResults(true);
+                          }}
+                          size="lg"
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="mr-2"
+                          >
+                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                          View Detailed Analysis
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Kết quả phân tích bị blur hoặc hiển thị rõ */}
+                  <div
+                    className={`transition-all duration-500 ${
+                      !showResults
+                        ? "filter blur-lg pointer-events-none select-none"
+                        : ""
+                    }`}
+                  >
+                    <AcneResults
+                      results={{
+                        ...acneResults,
+                        rawData: { ...acneResults.rawData, output_image: null }, // Loại bỏ ảnh khỏi AcneResults
+                      }}
+                    />
+                    <div className="space-y-6">
+                      <SuggestionPanel
+                        skinType={skinType}
+                        acneTypes={acneResults.types.map((t) => t.name)}
+                        acneCounts={acneResults.types.map((t) => t.count)}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex justify-center">
+                <Button onClick={resetScan} variant="outline">
+                  Scan Again
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

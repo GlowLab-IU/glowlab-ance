@@ -2,7 +2,8 @@ import { Product, products } from "./mock-products";
 
 type SkinType = "oily" | "dry" | "sensitive" | "combination";
 
-const acneTypeToSkin: Record<string, SkinType[]> = {
+// Mapping from acne type to likely skin types
+export const acneTypeToSkinType: Record<string, SkinType[]> = {
   blackhead: ["oily"],
   whitehead: ["oily"],
   papular: ["sensitive"],
@@ -27,12 +28,13 @@ export function inferSkinType(acneStats: Record<string, number>): SkinType {
 
   for (const acneType in acneStats) {
     const count = acneStats[acneType];
-    const relatedSkin = acneTypeToSkin[acneType] || [];
+    const relatedSkin = acneTypeToSkinType[acneType] || [];
 
     relatedSkin.forEach((type) => {
       score[type] += count;
     });
   }
 
+  // Return the skin type with the highest score
   return Object.entries(score).sort((a, b) => b[1] - a[1])[0][0] as SkinType;
 }

@@ -17,7 +17,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="w-full px-4 py-3 bg-white border-b shadow-sm fixed top-0 z-50">
+    <header className="w-full px-4 py-3 bg-white border-b shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         <Link href="/" className="text-lg font-bold text-primary">
           GlowChain
@@ -27,7 +27,8 @@ const Header = () => {
           <Link href="/">Home</Link>
           <Link href="/camera">Scan</Link>
           <Link href="/result-medical">Result</Link>
-          <Link href="/dasboard">Dasboard</Link>
+          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/register-product">Register Product</Link>
 
           <WalletMultiButton />
         </div>
@@ -58,6 +59,15 @@ const Header = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Result
+            </Link>
+            <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+              Dashboard
+            </Link>
+            <Link
+              href="/register-product"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Register Product
             </Link>
           </nav>
         </div>
