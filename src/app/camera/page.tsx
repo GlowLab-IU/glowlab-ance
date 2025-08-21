@@ -90,7 +90,7 @@ export default function ScanAcnePage() {
       //https://acne10.aiotlab.io.vn/upload_image
       //https://inspired-bear-emerging.ngrok-free.app/upload_image
       const response = await axios.post(
-        "https://inspired-bear-emerging.ngrok-free.app/upload_image",
+        "https://acne10.aiotlab.io.vn/upload_image",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
